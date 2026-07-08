@@ -28,10 +28,10 @@ const flowRow = {
 beforeEach(() => {
   vi.mocked(prisma.run.create).mockReset();
   vi.mocked(prisma.flow.findUnique).mockReset();
-  vi.mocked(prisma.run.create).mockImplementation(async ({ data }: { data: unknown }) => ({
+  vi.mocked(prisma.run.create).mockImplementation((async ({ data }: { data: unknown }) => ({
     id: "run_1",
     ...(data as object),
-  }));
+  })) as never);
 });
 
 describe("runFlow", () => {
