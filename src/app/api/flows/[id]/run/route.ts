@@ -21,10 +21,10 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/flows/[id]/
     const run = await runFlow(id, parsed.data.input);
     return Response.json(run, { status: 200 });
   } catch (err) {
-    const message = (err as Error).message;
-    if (message === "Flow not found") {
-      return Response.json({ error: message }, { status: 404 });
+    if (err instanceof Error && err.message === "Flow not found") {
+      return Response.json({ error: err.message }, { status: 404 });
     }
-    return Response.json({ error: message }, { status: 500 });
+    console.error("POST /api/flows/[id]/run failed:", err);
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

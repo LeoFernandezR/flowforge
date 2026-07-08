@@ -16,7 +16,13 @@ export const fieldDefSchema = z.object({
 export const flowSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
   prompt: z.string().trim().min(1, "Prompt is required").max(10_000),
-  fields: z.array(fieldDefSchema).min(1, "Add at least one field"),
+  fields: z
+    .array(fieldDefSchema)
+    .min(1, "Add at least one field")
+    .refine(
+      (fields) => new Set(fields.map((f) => f.name)).size === fields.length,
+      "Field names must be unique",
+    ),
 });
 
 export const runInputSchema = z.object({

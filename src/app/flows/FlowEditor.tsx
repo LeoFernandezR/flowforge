@@ -62,8 +62,12 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
         body: JSON.stringify({ input }),
       });
       const data = await res.json();
-      setResult(JSON.stringify(data, null, 2));
-      router.refresh();
+      if (!res.ok) {
+        setResult(`Error: ${JSON.stringify(data, null, 2)}`);
+      } else {
+        setResult(JSON.stringify(data, null, 2));
+        router.refresh();
+      }
     } catch (err) {
       setResult(`Request failed: ${(err as Error).message}`);
     } finally {

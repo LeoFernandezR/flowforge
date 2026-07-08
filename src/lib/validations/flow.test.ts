@@ -19,6 +19,17 @@ describe("flowSchema", () => {
   test("rejects a flow with no fields", () => {
     expect(flowSchema.safeParse({ ...validFlow, fields: [] }).success).toBe(false);
   });
+
+  test("rejects a flow with duplicate field names", () => {
+    const r = flowSchema.safeParse({
+      ...validFlow,
+      fields: [
+        { name: "email", type: "string", required: true, order: 0 },
+        { name: "email", type: "number", required: false, order: 1 },
+      ],
+    });
+    expect(r.success).toBe(false);
+  });
 });
 
 describe("fieldDefSchema", () => {

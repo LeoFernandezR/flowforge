@@ -42,5 +42,8 @@ describe("POST /api/flows/[id]/run", () => {
     vi.mocked(runFlow).mockRejectedValue(new Error("GEMINI_API_KEY is not set"));
     const res = await POST(makeRequest({ input: "Ada" }) as never, ctx as never);
     expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toBe("Internal server error");
+    expect(body.error).not.toContain("GEMINI_API_KEY");
   });
 });
