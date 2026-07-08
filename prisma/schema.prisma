@@ -12,11 +12,30 @@ datasource db {
   provider = "postgresql"
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean  @default(false)
+model Flow {
+  id        String   @id @default(cuid())
+  name      String
+  prompt    String
+  taskType  String   @default("extract")
+  fields    Json
+  runs      Run[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // userId String?   ← reserved for future auth
+}
+
+model Run {
+  id           String   @id @default(cuid())
+  flowId       String
+  flow         Flow     @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  input        String
+  status       String
+  output       Json?
+  errorMessage String?
+  provider     String
+  model        String
+  durationMs   Int?
+  createdAt    DateTime @default(now())
+
+  @@index([flowId])
 }
