@@ -30,6 +30,19 @@ describe("flowSchema", () => {
     });
     expect(r.success).toBe(false);
   });
+
+  test("accepts a valid provider", () => {
+    expect(flowSchema.safeParse({ ...validFlow, provider: "groq" }).success).toBe(true);
+  });
+
+  test("rejects an unknown provider", () => {
+    expect(flowSchema.safeParse({ ...validFlow, provider: "openai" }).success).toBe(false);
+  });
+
+  test("defaults the provider to gemini", () => {
+    const parsed = flowSchema.parse(validFlow);
+    expect(parsed.provider).toBe("gemini");
+  });
 });
 
 describe("fieldDefSchema", () => {

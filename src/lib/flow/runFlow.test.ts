@@ -22,6 +22,7 @@ const flowRow = {
   name: "Contacts",
   prompt: "extract",
   taskType: "extract",
+  provider: "gemini",
   fields: [{ name: "name", type: "string", required: true, order: 0 }],
 };
 

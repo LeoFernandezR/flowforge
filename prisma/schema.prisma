@@ -17,6 +17,7 @@ model Flow {
   name      String
   prompt    String
   taskType  String   @default("extract")
+  provider  String   @default("gemini")   // "gemini" | "groq"
   fields    Json
   runs      Run[]
   createdAt DateTime @default(now())
