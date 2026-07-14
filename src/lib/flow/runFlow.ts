@@ -15,7 +15,7 @@ export async function runFlow(flowId: string, input: string, deps: RunFlowDeps =
     throw new Error("Flow not found");
   }
 
-  const provider = deps.provider ?? getProvider("gemini");
+  const provider = deps.provider ?? getProvider(flow.provider);
   const step = getStepExecutor(flow.taskType);
   const fields = flow.fields as unknown as FieldDef[];
 
