@@ -2,14 +2,12 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { getProvider } from "./index";
 
 describe("getProvider", () => {
-  const original = process.env.GEMINI_API_KEY;
-
   beforeEach(() => {
     vi.stubEnv("GEMINI_API_KEY", "test-key");
+    vi.stubEnv("GROQ_API_KEY", "test-key");
   });
   afterEach(() => {
     vi.unstubAllEnvs();
-    process.env.GEMINI_API_KEY = original;
   });
 
   test("returns a gemini provider with name and model", () => {
@@ -18,12 +16,23 @@ describe("getProvider", () => {
     expect(provider.model).toBe("gemini-flash-latest");
   });
 
+  test("returns a groq provider with name and model", () => {
+    const provider = getProvider("groq");
+    expect(provider.name).toBe("groq");
+    expect(provider.model).toBe("openai/gpt-oss-20b");
+  });
+
   test("throws on an unknown provider", () => {
-    expect(() => getProvider("groq")).toThrow(/Unknown provider/);
+    expect(() => getProvider("openai")).toThrow(/Unknown provider/);
   });
 
   test("gemini provider throws a clear error when the API key is missing", () => {
     vi.stubEnv("GEMINI_API_KEY", "");
     expect(() => getProvider("gemini")).toThrow(/GEMINI_API_KEY/);
+  });
+
+  test("groq provider throws a clear error when the API key is missing", () => {
+    vi.stubEnv("GROQ_API_KEY", "");
+    expect(() => getProvider("groq")).toThrow(/GROQ_API_KEY/);
   });
 });
