@@ -15,7 +15,7 @@ describe("getProvider", () => {
   test("returns a gemini provider with name and model", () => {
     const provider = getProvider("gemini");
     expect(provider.name).toBe("gemini");
-    expect(provider.model).toBe("gemini-2.0-flash");
+    expect(provider.model).toBe("gemini-flash-latest");
   });
 
   test("throws on an unknown provider", () => {

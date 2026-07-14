@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import type { GenerateStructuredArgs, LlmProvider } from "./types";
 
-const DEFAULT_MODEL = "gemini-2.0-flash";
+const DEFAULT_MODEL = "gemini-flash-latest";
 
 export function createGeminiProvider(): LlmProvider {
   const apiKey = process.env.GEMINI_API_KEY;
