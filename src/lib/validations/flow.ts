@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const PROVIDER_NAMES = ["gemini", "groq"] as const;
+export type ProviderName = (typeof PROVIDER_NAMES)[number];
+
 export const fieldTypeSchema = z.enum(["string", "number", "boolean", "string_array"]);
 
 export const fieldDefSchema = z.object({
@@ -16,7 +19,7 @@ export const fieldDefSchema = z.object({
 export const flowSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
   prompt: z.string().trim().min(1, "Prompt is required").max(10_000),
-  provider: z.enum(["gemini", "groq"]).default("gemini"),
+  provider: z.enum(PROVIDER_NAMES).default("gemini"),
   fields: z
     .array(fieldDefSchema)
     .min(1, "Add at least one field")

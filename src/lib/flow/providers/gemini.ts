@@ -22,11 +22,10 @@ export function buildGeminiSchema(fields: FieldDef[]): object {
   const required: string[] = [];
   for (const field of fields) {
     const prop = baseGeminiType(field.type);
-    if (field.required) {
-      required.push(field.name);
-    } else {
+    if (!field.required) {
       prop.nullable = true;
     }
+    required.push(field.name);
     properties[field.name] = prop;
   }
   return { type: Type.OBJECT, properties, required };

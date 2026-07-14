@@ -18,7 +18,7 @@ describe("buildGeminiSchema", () => {
         age: { type: Type.NUMBER },
         tags: { type: Type.ARRAY, items: { type: Type.STRING }, nullable: true },
       },
-      required: ["name", "age"],
+      required: ["name", "age", "tags"],
     });
   });
 });

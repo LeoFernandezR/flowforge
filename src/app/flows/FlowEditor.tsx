@@ -4,18 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createFlow, deleteFlow, updateFlow } from "./actions";
 import type { FieldDef, FieldType } from "@/lib/flow/types";
+import { PROVIDER_NAMES, type ProviderName } from "@/lib/validations/flow";
 
 const FIELD_TYPES: FieldType[] = ["string", "number", "boolean", "string_array"];
 
-const PROVIDERS = ["gemini", "groq"] as const;
-
-type EditorFlow = { id: string; name: string; prompt: string; provider: string; fields: FieldDef[] };
+type EditorFlow = { id: string; name: string; prompt: string; provider: ProviderName; fields: FieldDef[] };
 
 export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?: EditorFlow }) {
   const router = useRouter();
   const [name, setName] = useState(flow?.name ?? "");
   const [prompt, setPrompt] = useState(flow?.prompt ?? "");
-  const [provider, setProvider] = useState(flow?.provider ?? "gemini");
+  const [provider, setProvider] = useState<ProviderName>(flow?.provider ?? "gemini");
   const [fields, setFields] = useState<FieldDef[]>(
     flow?.fields ?? [{ name: "", type: "string", required: true, order: 0 }],
   );
@@ -102,10 +101,10 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
           <span className="text-sm font-medium">Provider</span>
           <select
             value={provider}
-            onChange={(e) => setProvider(e.target.value)}
+            onChange={(e) => setProvider(e.target.value as ProviderName)}
             className="mt-1 block w-full rounded border px-3 py-2"
           >
-            {PROVIDERS.map((p) => (
+            {PROVIDER_NAMES.map((p) => (
               <option key={p} value={p}>
                 {p}
               </option>

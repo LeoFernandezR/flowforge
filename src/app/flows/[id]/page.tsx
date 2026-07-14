@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import FlowEditor from "../FlowEditor";
 import type { FieldDef } from "@/lib/flow/types";
+import type { ProviderName } from "@/lib/validations/flow";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
           id: flow.id,
           name: flow.name,
           prompt: flow.prompt,
-          provider: flow.provider,
+          provider: flow.provider as ProviderName,
           fields: flow.fields as unknown as FieldDef[],
         }}
       />
