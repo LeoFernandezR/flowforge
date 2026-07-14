@@ -16,6 +16,7 @@ export const fieldDefSchema = z.object({
 export const flowSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
   prompt: z.string().trim().min(1, "Prompt is required").max(10_000),
+  provider: z.enum(["gemini", "groq"]).default("gemini"),
   fields: z
     .array(fieldDefSchema)
     .min(1, "Add at least one field")
