@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { buildJsonSchema, buildZodSchema } from "../schema";
+import { buildZodSchema } from "../schema";
 import type { StepContext, StepExecutor, StepResult } from "./types";
 
 const SYSTEM_INSTRUCTION =
@@ -9,14 +9,13 @@ const SYSTEM_INSTRUCTION =
 export const extractStep: StepExecutor = {
   async execute({ prompt, input, fields, provider }: StepContext): Promise<StepResult> {
     const zodSchema = buildZodSchema(fields);
-    const jsonSchema = buildJsonSchema(fields);
 
     let raw: unknown;
     try {
       raw = await provider.generateStructured({
         prompt: `${SYSTEM_INSTRUCTION}\n\n${prompt}`,
         input,
-        jsonSchema,
+        fields,
       });
     } catch (err) {
       return {

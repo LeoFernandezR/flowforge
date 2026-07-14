@@ -1,7 +1,9 @@
+import type { FieldDef } from "../types";
+
 export interface GenerateStructuredArgs {
   prompt: string;
   input: string;
-  jsonSchema: object;
+  fields: FieldDef[];
 }
 
 export interface LlmProvider {

@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Type } from "@google/genai";
-import { buildZodSchema, buildJsonSchema } from "./schema";
+import { buildZodSchema } from "./schema";
 import type { FieldDef } from "./types";
 
 const fields: FieldDef[] = [
@@ -26,19 +25,5 @@ describe("buildZodSchema", () => {
     const schema = buildZodSchema(fields);
     const r = schema.safeParse({ name: "Ada", age: 36 });
     expect(r.success).toBe(false);
-  });
-});
-
-describe("buildJsonSchema", () => {
-  test("maps types and required list for Gemini responseSchema", () => {
-    expect(buildJsonSchema(fields)).toEqual({
-      type: Type.OBJECT,
-      properties: {
-        name: { type: Type.STRING },
-        age: { type: Type.NUMBER },
-        tags: { type: Type.ARRAY, items: { type: Type.STRING }, nullable: true },
-      },
-      required: ["name", "age"],
-    });
   });
 });
