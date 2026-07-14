@@ -7,12 +7,15 @@ import type { FieldDef, FieldType } from "@/lib/flow/types";
 
 const FIELD_TYPES: FieldType[] = ["string", "number", "boolean", "string_array"];
 
-type EditorFlow = { id: string; name: string; prompt: string; fields: FieldDef[] };
+const PROVIDERS = ["gemini", "groq"] as const;
+
+type EditorFlow = { id: string; name: string; prompt: string; provider: string; fields: FieldDef[] };
 
 export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?: EditorFlow }) {
   const router = useRouter();
   const [name, setName] = useState(flow?.name ?? "");
   const [prompt, setPrompt] = useState(flow?.prompt ?? "");
+  const [provider, setProvider] = useState(flow?.provider ?? "gemini");
   const [fields, setFields] = useState<FieldDef[]>(
     flow?.fields ?? [{ name: "", type: "string", required: true, order: 0 }],
   );
@@ -36,7 +39,7 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
   async function save() {
     setSaving(true);
     setError(null);
-    const payload = { name, prompt, fields: fields.map((f, i) => ({ ...f, order: i })) };
+    const payload = { name, prompt, provider, fields: fields.map((f, i) => ({ ...f, order: i })) };
     try {
       if (mode === "new") {
         await createFlow(payload);
@@ -94,6 +97,20 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
             rows={4}
             className="mt-1 w-full rounded border px-3 py-2 font-mono text-sm"
           />
+        </label>
+        <label className="block">
+          <span className="text-sm font-medium">Provider</span>
+          <select
+            value={provider}
+            onChange={(e) => setProvider(e.target.value)}
+            className="mt-1 block w-full rounded border px-3 py-2"
+          >
+            {PROVIDERS.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
         </label>
 
         <div>

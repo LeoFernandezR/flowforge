@@ -30,6 +30,7 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
           id: flow.id,
           name: flow.name,
           prompt: flow.prompt,
+          provider: flow.provider,
           fields: flow.fields as unknown as FieldDef[],
         }}
       />
