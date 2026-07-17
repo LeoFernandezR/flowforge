@@ -36,15 +36,16 @@ export async function runFlow(flowId: string, input: string, deps: RunFlowDeps =
   let lastModel = "";
 
   for (const step of steps) {
-    const provider = deps.provider ?? getProvider(step.provider ?? flow.provider);
-    lastProviderName = provider.name;
-    lastModel = provider.model;
-
     const start = Date.now();
     let status: "success" | "error";
     let output: Record<string, unknown> | null;
     let error: string | null;
+    let model = lastModel;
     try {
+      const provider = deps.provider ?? getProvider(step.provider ?? flow.provider);
+      lastProviderName = provider.name;
+      lastModel = provider.model;
+      model = provider.model;
       const resolved = resolveTemplate(step.prompt, context);
       const result = await getStepExecutor(step.type).execute({
         prompt: resolved,
@@ -61,7 +62,7 @@ export async function runFlow(flowId: string, input: string, deps: RunFlowDeps =
     }
     const ms = Date.now() - start;
 
-    trace.push({ key: step.key, type: step.type, status, output, error, model: provider.model, ms });
+    trace.push({ key: step.key, type: step.type, status, output, error, model, ms });
 
     if (status === "error") {
       runStatus = "error";

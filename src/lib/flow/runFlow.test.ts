@@ -133,4 +133,31 @@ describe("runFlow", () => {
     expect(arg.output.final).toBeNull();
     expect(arg.errorMessage).toMatch(/Validation failed/);
   });
+
+  test("persists an error run when a step's provider is unknown", async () => {
+    vi.mocked(prisma.flow.findUnique).mockResolvedValue({
+      ...oneStepFlow,
+      steps: [
+        {
+          key: "extract1",
+          type: "extract",
+          prompt: "Extract {{input}}",
+          provider: "bogus",
+          fields: [{ name: "name", type: "string", required: true, order: 0 }],
+        },
+      ],
+    } as never);
+
+    await runFlow("flow_1", "Ada", {}); // no deps.provider → getProvider("bogus") runs and throws
+
+    const arg = vi.mocked(prisma.run.create).mock.calls[0][0].data as unknown as {
+      status: string;
+      errorMessage: string;
+      output: { final: unknown; steps: unknown[] };
+    };
+    expect(arg.status).toBe("error");
+    expect(arg.errorMessage).toMatch(/Unknown provider/);
+    expect(arg.output.steps).toHaveLength(1);
+    expect(arg.output.final).toBeNull();
+  });
 });
