@@ -11,10 +11,12 @@ export async function createFlow(data: unknown): Promise<void> {
   const flow = await prisma.flow.create({
     data: {
       name: parsed.name,
-      prompt: parsed.prompt,
-      taskType: "extract",
       provider: parsed.provider,
-      fields: parsed.fields as unknown as Prisma.InputJsonValue,
+      steps: parsed.steps as unknown as Prisma.InputJsonValue,
+      // Legacy columns (dropped in a later task) — filled to satisfy NOT NULL.
+      prompt: parsed.steps[0].prompt,
+      taskType: "extract",
+      fields: (parsed.steps[0].fields ?? []) as unknown as Prisma.InputJsonValue,
     },
   });
   revalidatePath("/");
@@ -27,9 +29,12 @@ export async function updateFlow(id: string, data: unknown): Promise<void> {
     where: { id },
     data: {
       name: parsed.name,
-      prompt: parsed.prompt,
       provider: parsed.provider,
-      fields: parsed.fields as unknown as Prisma.InputJsonValue,
+      steps: parsed.steps as unknown as Prisma.InputJsonValue,
+      // Legacy columns (dropped in a later task) — kept in sync to satisfy NOT NULL.
+      prompt: parsed.steps[0].prompt,
+      taskType: "extract",
+      fields: (parsed.steps[0].fields ?? []) as unknown as Prisma.InputJsonValue,
     },
   });
   revalidatePath(`/flows/${id}`);
