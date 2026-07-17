@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { parseRefs, stepOutputFields } from "@/lib/flow/template";
+import { parseRefs, availableRefs } from "@/lib/flow/template";
 import type { Step } from "@/lib/flow/types";
 
 export const PROVIDER_NAMES = ["gemini", "groq"] as const;
@@ -42,6 +42,9 @@ export const stepSchema = z
         ctx.addIssue({ code: "custom", message: "Field names must be unique", path: ["fields"] });
       }
     }
+    if (step.type === "generate" && step.fields && step.fields.length > 0) {
+      ctx.addIssue({ code: "custom", message: "Generate steps take no fields", path: ["fields"] });
+    }
   });
 
 export const flowSchema = z
@@ -57,11 +60,7 @@ export const flowSchema = z
     }
 
     flow.steps.forEach((step, i) => {
-      const prior = flow.steps.slice(0, i) as Step[];
-      const allowed = new Set<string>(["input"]);
-      for (const p of prior) {
-        for (const field of stepOutputFields(p)) allowed.add(`${p.key}.${field}`);
-      }
+      const allowed = new Set(availableRefs(flow.steps.slice(0, i) as Step[]));
       for (const ref of parseRefs(step.prompt)) {
         if (!allowed.has(ref.raw)) {
           ctx.addIssue({

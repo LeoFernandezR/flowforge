@@ -134,6 +134,47 @@ describe("runFlow", () => {
     expect(arg.errorMessage).toMatch(/Validation failed/);
   });
 
+  test("sets final to null when a later step fails after an earlier success", async () => {
+    vi.mocked(prisma.flow.findUnique).mockResolvedValue({
+      ...oneStepFlow,
+      steps: [
+        {
+          key: "extract1",
+          type: "extract",
+          prompt: "Extract {{input}}",
+          fields: [{ name: "name", type: "string", required: true, order: 0 }],
+        },
+        {
+          key: "extract2",
+          type: "extract",
+          prompt: "Then {{extract1.name}}",
+          fields: [{ name: "name", type: "string", required: true, order: 0 }],
+        },
+      ],
+    } as never);
+
+    let call = 0;
+    const provider: LlmProvider = {
+      name: "mock",
+      model: "mock-1",
+      generateStructured: async () => {
+        call++;
+        return call === 1 ? { name: "Ada" } : { name: 123 }; // step 2 fails Zod validation
+      },
+    };
+    await runFlow("flow_1", "Ada", { provider });
+
+    const arg = vi.mocked(prisma.run.create).mock.calls[0][0].data as unknown as {
+      status: string;
+      output: { final: unknown; steps: Array<{ status: string }> };
+    };
+    expect(arg.status).toBe("error");
+    expect(arg.output.final).toBeNull();
+    expect(arg.output.steps).toHaveLength(2);
+    expect(arg.output.steps[0].status).toBe("success");
+    expect(arg.output.steps[1].status).toBe("error");
+  });
+
   test("persists an error run when a step's provider is unknown", async () => {
     vi.mocked(prisma.flow.findUnique).mockResolvedValue({
       ...oneStepFlow,

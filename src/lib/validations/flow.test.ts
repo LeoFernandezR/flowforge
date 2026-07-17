@@ -80,6 +80,16 @@ describe("flowSchema", () => {
     expect(flowSchema.safeParse(flow).success).toBe(true);
   });
 
+  test("rejects a generate step that carries fields", () => {
+    const flow = {
+      ...validFlow,
+      steps: [
+        { key: "gen1", type: "generate", prompt: "hi", fields: [{ name: "x", type: "string", required: true, order: 0 }] },
+      ],
+    };
+    expect(flowSchema.safeParse(flow).success).toBe(false);
+  });
+
   test("accepts a valid provider and rejects an unknown one", () => {
     expect(flowSchema.safeParse({ ...validFlow, provider: "groq" }).success).toBe(true);
     expect(flowSchema.safeParse({ ...validFlow, provider: "openai" }).success).toBe(false);

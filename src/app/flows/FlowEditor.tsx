@@ -4,10 +4,14 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createFlow, deleteFlow, updateFlow } from "./actions";
 import type { FieldDef, FieldType, Step, StepType } from "@/lib/flow/types";
-import { stepOutputFields } from "@/lib/flow/template";
+import { availableRefs } from "@/lib/flow/template";
 import { PROVIDER_NAMES, type ProviderName } from "@/lib/validations/flow";
 
 const FIELD_TYPES: FieldType[] = ["string", "number", "boolean", "string_array"];
+
+let fieldKeySeq = 0;
+
+type EditorField = FieldDef & { _key: number }; // _key is client-only, never saved
 
 type EditorStep = {
   key: string;
@@ -15,10 +19,13 @@ type EditorStep = {
   name: string;
   prompt: string;
   provider: ProviderName | ""; // "" = inherit flow default
-  fields: FieldDef[]; // used by extract; empty for generate
+  fields: EditorField[]; // used by extract; empty for generate
 };
 
-type EditorFlow = { id: string; name: string; provider: ProviderName; steps: EditorStep[] };
+// Shape of a step as it arrives via props (server data, no client-only `_key` yet).
+type IncomingStep = Omit<EditorStep, "fields"> & { fields: FieldDef[] };
+
+type EditorFlow = { id: string; name: string; provider: ProviderName; steps: IncomingStep[] };
 
 type StepTraceView = {
   key: string;
@@ -48,7 +55,7 @@ function emptyExtractStep(steps: EditorStep[]): EditorStep {
     name: "",
     prompt: "",
     provider: "",
-    fields: [{ name: "", type: "string", required: true, order: 0 }],
+    fields: [{ name: "", type: "string", required: true, order: 0, _key: fieldKeySeq++ }],
   };
 }
 
@@ -57,20 +64,18 @@ function emptyGenerateStep(steps: EditorStep[]): EditorStep {
 }
 
 function refsBefore(steps: EditorStep[], index: number): string[] {
-  const refs = ["input"];
-  for (let i = 0; i < index; i++) {
-    for (const field of stepOutputFields(steps[i] as unknown as Step)) {
-      refs.push(`${steps[i].key}.${field}`);
-    }
-  }
-  return refs;
+  return availableRefs(steps.slice(0, index) as unknown as Step[]);
+}
+
+function withFieldKeys(steps: IncomingStep[]): EditorStep[] {
+  return steps.map((s) => ({ ...s, fields: s.fields.map((f) => ({ ...f, _key: fieldKeySeq++ })) }));
 }
 
 export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?: EditorFlow }) {
   const router = useRouter();
   const [name, setName] = useState(flow?.name ?? "");
   const [provider, setProvider] = useState<ProviderName>(flow?.provider ?? "gemini");
-  const [steps, setSteps] = useState<EditorStep[]>(flow?.steps ?? [emptyExtractStep([])]);
+  const [steps, setSteps] = useState<EditorStep[]>(flow ? withFieldKeys(flow.steps) : [emptyExtractStep([])]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -112,7 +117,13 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
     setSteps((prev) =>
       prev.map((s, i) =>
         i === stepIndex
-          ? { ...s, fields: [...s.fields, { name: "", type: "string", required: true, order: s.fields.length }] }
+          ? {
+              ...s,
+              fields: [
+                ...s.fields,
+                { name: "", type: "string", required: true, order: s.fields.length, _key: fieldKeySeq++ },
+              ],
+            }
           : s,
       ),
     );
@@ -149,7 +160,9 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
     const step: Step = { key: s.key, type: s.type, prompt: s.prompt };
     if (s.name.trim()) step.name = s.name.trim();
     if (s.provider) step.provider = s.provider;
-    if (s.type === "extract") step.fields = s.fields.map((f, i) => ({ ...f, order: i }));
+    if (s.type === "extract") {
+      step.fields = s.fields.map((f, i) => ({ name: f.name, type: f.type, required: f.required, order: i }));
+    }
     return step;
   }
 
@@ -309,7 +322,7 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                 <span className="text-xs text-gray-500">Output fields</span>
                 <div className="mt-1 space-y-2">
                   {step.fields.map((field, k) => (
-                    <div key={k} className="flex items-center gap-2">
+                    <div key={field._key} className="flex items-center gap-2">
                       <input
                         placeholder="field_name"
                         value={field.name}

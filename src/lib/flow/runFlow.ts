@@ -67,6 +67,7 @@ export async function runFlow(flowId: string, input: string, deps: RunFlowDeps =
     if (status === "error") {
       runStatus = "error";
       runErrorMessage = error;
+      finalOutput = null;
       break;
     }
     context[step.key] = output ?? {};
