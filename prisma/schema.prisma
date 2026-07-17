@@ -19,6 +19,7 @@ model Flow {
   taskType  String   @default("extract")
   provider  String   @default("gemini")   // "gemini" | "groq"
   fields    Json
+  steps     Json?                          // ordered Step[]; source of truth (legacy cols dropped later)
   runs      Run[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
