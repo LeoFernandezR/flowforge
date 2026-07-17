@@ -2,9 +2,8 @@ import type { FieldDef } from "../types";
 import type { LlmProvider } from "../providers/types";
 
 export interface StepContext {
-  prompt: string;
-  input: string;
-  fields: FieldDef[];
+  prompt: string; // fully-resolved instruction (template already interpolated)
+  fields: FieldDef[]; // output fields (extract). generate ignores this and uses its own.
   provider: LlmProvider;
 }
 

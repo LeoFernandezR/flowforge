@@ -9,18 +9,13 @@ const fields: FieldDef[] = [
 ];
 
 function mockProvider(returns: unknown): LlmProvider {
-  return {
-    name: "mock",
-    model: "mock-1",
-    generateStructured: async () => returns,
-  };
+  return { name: "mock", model: "mock-1", generateStructured: async () => returns };
 }
 
 describe("extractStep", () => {
   test("returns typed success when the LLM output validates", async () => {
     const result = await extractStep.execute({
-      prompt: "extract",
-      input: "Ada, 36",
+      prompt: "Extract from: Ada, 36",
       fields,
       provider: mockProvider({ name: "Ada", age: 36 }),
     });
@@ -31,8 +26,7 @@ describe("extractStep", () => {
 
   test("returns an error when the LLM output fails Zod validation", async () => {
     const result = await extractStep.execute({
-      prompt: "extract",
-      input: "Ada, old",
+      prompt: "Extract from: Ada, old",
       fields,
       provider: mockProvider({ name: "Ada", age: "old" }),
     });
@@ -49,7 +43,7 @@ describe("extractStep", () => {
         throw new Error("network down");
       },
     };
-    const result = await extractStep.execute({ prompt: "x", input: "y", fields, provider });
+    const result = await extractStep.execute({ prompt: "x", fields, provider });
     expect(result.status).toBe("error");
     expect(result.errorMessage).toMatch(/LLM error: network down/);
   });
