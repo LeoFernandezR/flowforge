@@ -7,7 +7,12 @@ import type { FieldDef, FieldType, Step, StepType } from "@/lib/flow/types";
 import { availableRefs } from "@/lib/flow/template";
 import { PROVIDER_NAMES, type ProviderName } from "@/lib/validations/flow";
 
-const FIELD_TYPES: FieldType[] = ["string", "number", "boolean", "string_array"];
+const FIELD_TYPES: FieldType[] = [
+  "string",
+  "number",
+  "boolean",
+  "string_array",
+];
 
 let fieldKeySeq = 0;
 
@@ -25,7 +30,12 @@ type EditorStep = {
 // Shape of a step as it arrives via props (server data, no client-only `_key` yet).
 type IncomingStep = Omit<EditorStep, "fields"> & { fields: FieldDef[] };
 
-type EditorFlow = { id: string; name: string; provider: ProviderName; steps: IncomingStep[] };
+type EditorFlow = {
+  id: string;
+  name: string;
+  provider: ProviderName;
+  steps: IncomingStep[];
+};
 
 type StepTraceView = {
   key: string;
@@ -56,12 +66,27 @@ function emptyExtractStep(steps: EditorStep[]): EditorStep {
     name: "",
     prompt: "",
     provider: "",
-    fields: [{ name: "", type: "string", required: true, order: 0, _key: fieldKeySeq++ }],
+    fields: [
+      {
+        name: "",
+        type: "string",
+        required: true,
+        order: 0,
+        _key: fieldKeySeq++,
+      },
+    ],
   };
 }
 
 function emptyGenerateStep(steps: EditorStep[]): EditorStep {
-  return { key: nextKey("generate", steps), type: "generate", name: "", prompt: "", provider: "", fields: [] };
+  return {
+    key: nextKey("generate", steps),
+    type: "generate",
+    name: "",
+    prompt: "",
+    provider: "",
+    fields: [],
+  };
 }
 
 function refsBefore(steps: EditorStep[], index: number): string[] {
@@ -71,11 +96,16 @@ function refsBefore(steps: EditorStep[], index: number): string[] {
 // Refs this step contributes onto the wire (its own outputs), for the rail annotation.
 function refsAfter(step: EditorStep): string[] {
   if (step.type === "generate") return [`${step.key}.text`];
-  return step.fields.filter((f) => f.name.trim()).map((f) => `${step.key}.${f.name}`);
+  return step.fields
+    .filter((f) => f.name.trim())
+    .map((f) => `${step.key}.${f.name}`);
 }
 
 function withFieldKeys(steps: IncomingStep[]): EditorStep[] {
-  return steps.map((s) => ({ ...s, fields: s.fields.map((f) => ({ ...f, _key: fieldKeySeq++ })) }));
+  return steps.map((s) => ({
+    ...s,
+    fields: s.fields.map((f) => ({ ...f, _key: fieldKeySeq++ })),
+  }));
 }
 
 // Rail cell: the connector "wire" running down the drawing, with a node marker per row.
@@ -83,25 +113,45 @@ function withFieldKeys(steps: IncomingStep[]): EditorStep[] {
 function RailCell({ kind }: { kind: "node" | "terminal" }) {
   return (
     <div className="relative flex w-6 justify-center">
-      <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-blueprint/40" aria-hidden />
+      <span
+        className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-blueprint/40"
+        aria-hidden
+      />
       {kind === "terminal" ? (
-        <span className="relative mt-1.5 h-2.5 w-2.5 border border-blueprint bg-paper" aria-hidden />
+        <span
+          className="relative mt-1.5 h-2.5 w-2.5 border border-blueprint bg-paper"
+          aria-hidden
+        />
       ) : (
-        <span className="relative mt-4 h-2.5 w-2.5 rounded-full border border-blueprint bg-paper" aria-hidden />
+        <span
+          className="relative mt-4 h-2.5 w-2.5 rounded-full border border-blueprint bg-paper"
+          aria-hidden
+        />
       )}
     </div>
   );
 }
 
-const EYEBROW = "font-display text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft";
+const EYEBROW =
+  "font-display text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft";
 const INPUT_CLS =
   "rounded-sm border border-hairline bg-sheet px-2 py-1 text-sm text-ink outline-none placeholder:text-ink-soft";
 
-export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?: EditorFlow }) {
+export default function FlowEditor({
+  mode,
+  flow,
+}: {
+  mode: "new" | "edit";
+  flow?: EditorFlow;
+}) {
   const router = useRouter();
   const [name, setName] = useState(flow?.name ?? "");
-  const [provider, setProvider] = useState<ProviderName>(flow?.provider ?? "gemini");
-  const [steps, setSteps] = useState<EditorStep[]>(flow ? withFieldKeys(flow.steps) : [emptyExtractStep([])]);
+  const [provider, setProvider] = useState<ProviderName>(
+    flow?.provider ?? "groq",
+  );
+  const [steps, setSteps] = useState<EditorStep[]>(
+    flow ? withFieldKeys(flow.steps) : [emptyExtractStep([])],
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -112,10 +162,15 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
   const promptRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
 
   function updateStep(index: number, patch: Partial<EditorStep>) {
-    setSteps((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+    setSteps((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, ...patch } : s)),
+    );
   }
   function addStep(type: StepType) {
-    setSteps((prev) => [...prev, type === "extract" ? emptyExtractStep(prev) : emptyGenerateStep(prev)]);
+    setSteps((prev) => [
+      ...prev,
+      type === "extract" ? emptyExtractStep(prev) : emptyGenerateStep(prev),
+    ]);
   }
   function removeStep(index: number) {
     setSteps((prev) => prev.filter((_, i) => i !== index));
@@ -130,11 +185,20 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
     });
   }
 
-  function updateField(stepIndex: number, fieldIndex: number, patch: Partial<FieldDef>) {
+  function updateField(
+    stepIndex: number,
+    fieldIndex: number,
+    patch: Partial<FieldDef>,
+  ) {
     setSteps((prev) =>
       prev.map((s, i) =>
         i === stepIndex
-          ? { ...s, fields: s.fields.map((f, k) => (k === fieldIndex ? { ...f, ...patch } : f)) }
+          ? {
+              ...s,
+              fields: s.fields.map((f, k) =>
+                k === fieldIndex ? { ...f, ...patch } : f,
+              ),
+            }
           : s,
       ),
     );
@@ -147,7 +211,13 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
               ...s,
               fields: [
                 ...s.fields,
-                { name: "", type: "string", required: true, order: s.fields.length, _key: fieldKeySeq++ },
+                {
+                  name: "",
+                  type: "string",
+                  required: true,
+                  order: s.fields.length,
+                  _key: fieldKeySeq++,
+                },
               ],
             }
           : s,
@@ -158,7 +228,12 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
     setSteps((prev) =>
       prev.map((s, i) =>
         i === stepIndex
-          ? { ...s, fields: s.fields.filter((_, k) => k !== fieldIndex).map((f, k) => ({ ...f, order: k })) }
+          ? {
+              ...s,
+              fields: s.fields
+                .filter((_, k) => k !== fieldIndex)
+                .map((f, k) => ({ ...f, order: k })),
+            }
           : s,
       ),
     );
@@ -174,7 +249,9 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
     }
     const start = el.selectionStart ?? step.prompt.length;
     const end = el.selectionEnd ?? step.prompt.length;
-    updateStep(index, { prompt: step.prompt.slice(0, start) + token + step.prompt.slice(end) });
+    updateStep(index, {
+      prompt: step.prompt.slice(0, start) + token + step.prompt.slice(end),
+    });
     requestAnimationFrame(() => {
       el.focus();
       const caret = start + token.length;
@@ -187,7 +264,12 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
     if (s.name.trim()) step.name = s.name.trim();
     if (s.provider) step.provider = s.provider;
     if (s.type === "extract") {
-      step.fields = s.fields.map((f, i) => ({ name: f.name, type: f.type, required: f.required, order: i }));
+      step.fields = s.fields.map((f, i) => ({
+        name: f.name,
+        type: f.type,
+        required: f.required,
+        order: i,
+      }));
     }
     return step;
   }
@@ -222,13 +304,25 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
       });
       const data = await res.json();
       if (!res.ok) {
-        setResult({ status: "error", output: null, errorMessage: JSON.stringify(data) });
+        setResult({
+          status: "error",
+          output: null,
+          errorMessage: JSON.stringify(data),
+        });
       } else {
-        setResult({ status: data.status, output: data.output, errorMessage: data.errorMessage });
+        setResult({
+          status: data.status,
+          output: data.output,
+          errorMessage: data.errorMessage,
+        });
         router.refresh();
       }
     } catch (err) {
-      setResult({ status: "error", output: null, errorMessage: (err as Error).message });
+      setResult({
+        status: "error",
+        output: null,
+        errorMessage: (err as Error).message,
+      });
     } finally {
       setRunning(false);
     }
@@ -262,7 +356,7 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
             <select
               value={provider}
               onChange={(e) => setProvider(e.target.value as ProviderName)}
-              className="mt-0.5 block w-full bg-transparent font-mono text-sm text-ink outline-none"
+              className="mt-0.5 block w-full bg-sheet font-mono text-sm text-ink outline-none"
             >
               {PROVIDER_NAMES.map((p) => (
                 <option key={p} value={p}>
@@ -273,30 +367,43 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
           </label>
           <div className="px-3 py-2">
             <span className={EYEBROW}>Steps</span>
-            <div className="mt-0.5 font-mono text-lg text-ink">{steps.length}</div>
+            <div className="mt-0.5 font-mono text-lg text-ink">
+              {steps.length}
+            </div>
           </div>
           <div className="px-3 py-2">
             <span className={EYEBROW}>Status</span>
-            <div className="mt-0.5 font-mono text-sm text-ink">{result?.status ?? "draft"}</div>
+            <div className="mt-0.5 font-mono text-sm text-ink">
+              {result?.status ?? "draft"}
+            </div>
           </div>
         </div>
       </section>
 
-      <div className={`grid grid-cols-1 gap-6 ${twoPane ? "lg:grid-cols-[minmax(0,1fr)_360px]" : ""}`}>
+      <div
+        className={`grid grid-cols-1 gap-6 ${twoPane ? "lg:grid-cols-[minmax(0,1fr)_360px]" : ""}`}
+      >
         {/* ── The drawing ── */}
         <div className="min-w-0">
           {/* input node */}
           <div className="grid grid-cols-[24px_minmax(0,1fr)] gap-3">
             <RailCell kind="terminal" />
             <div className="py-1">
-              <span className="font-mono text-xs font-medium text-blueprint">input</span>
-              <span className="ml-2 font-mono text-[11px] text-ink-soft">{`{{input}}`} · the run&apos;s input text</span>
+              <span className="font-mono text-xs font-medium text-blueprint">
+                input
+              </span>
+              <span className="ml-2 font-mono text-[11px] text-ink-soft">
+                {`{{input}}`} · the run&apos;s input text
+              </span>
             </div>
           </div>
 
           {/* step cards */}
           {steps.map((step, i) => (
-            <div key={step.key} className="grid grid-cols-[24px_minmax(0,1fr)] gap-3">
+            <div
+              key={step.key}
+              className="grid grid-cols-[24px_minmax(0,1fr)] gap-3"
+            >
               <RailCell kind="node" />
               <div className="mb-3 border border-hairline bg-sheet">
                 {/* title strip */}
@@ -315,7 +422,11 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                   />
                   <select
                     value={step.provider}
-                    onChange={(e) => updateStep(i, { provider: e.target.value as ProviderName | "" })}
+                    onChange={(e) =>
+                      updateStep(i, {
+                        provider: e.target.value as ProviderName | "",
+                      })
+                    }
                     className="rounded-sm border border-hairline bg-sheet px-1.5 py-0.5 font-mono text-xs text-ink"
                   >
                     <option value="">↳ flow default</option>
@@ -364,7 +475,9 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                         promptRefs.current[step.key] = el;
                       }}
                       value={step.prompt}
-                      onChange={(e) => updateStep(i, { prompt: e.target.value })}
+                      onChange={(e) =>
+                        updateStep(i, { prompt: e.target.value })
+                      }
                       rows={3}
                       className="mt-1 w-full rounded-sm border border-hairline bg-paper/40 px-3 py-2 font-mono text-sm text-ink outline-none"
                     />
@@ -390,16 +503,25 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                       <span className={EYEBROW}>Output fields</span>
                       <div className="mt-1 space-y-2">
                         {step.fields.map((field, k) => (
-                          <div key={field._key} className="flex flex-wrap items-center gap-2">
+                          <div
+                            key={field._key}
+                            className="flex flex-wrap items-center gap-2"
+                          >
                             <input
                               placeholder="field_name"
                               value={field.name}
-                              onChange={(e) => updateField(i, k, { name: e.target.value })}
+                              onChange={(e) =>
+                                updateField(i, k, { name: e.target.value })
+                              }
                               className={`min-w-0 flex-1 ${INPUT_CLS}`}
                             />
                             <select
                               value={field.type}
-                              onChange={(e) => updateField(i, k, { type: e.target.value as FieldType })}
+                              onChange={(e) =>
+                                updateField(i, k, {
+                                  type: e.target.value as FieldType,
+                                })
+                              }
                               className="rounded-sm border border-hairline bg-sheet px-2 py-1 font-mono text-xs text-ink"
                             >
                               {FIELD_TYPES.map((t) => (
@@ -412,7 +534,11 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                               <input
                                 type="checkbox"
                                 checked={field.required}
-                                onChange={(e) => updateField(i, k, { required: e.target.checked })}
+                                onChange={(e) =>
+                                  updateField(i, k, {
+                                    required: e.target.checked,
+                                  })
+                                }
                                 className="accent-azure"
                               />
                               required
@@ -437,16 +563,22 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                     </div>
                   ) : (
                     <p className="font-mono text-[11px] text-ink-soft">
-                      outputs <span className="text-blueprint">{`{{${step.key}.text}}`}</span>
+                      outputs{" "}
+                      <span className="text-blueprint">{`{{${step.key}.text}}`}</span>
                     </p>
                   )}
 
                   {/* rail annotation: what this component puts on the wire */}
                   {refsAfter(step).length > 0 && (
                     <div className="flex flex-wrap items-center gap-1 border-t border-dashed border-hairline pt-2">
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-ink-soft">on wire →</span>
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+                        on wire →
+                      </span>
                       {refsAfter(step).map((r) => (
-                        <span key={r} className="font-mono text-[11px] text-blueprint">
+                        <span
+                          key={r}
+                          className="font-mono text-[11px] text-blueprint"
+                        >
                           {`{{${r}}}`}
                         </span>
                       ))}
@@ -482,14 +614,20 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
           <div className="grid grid-cols-[24px_minmax(0,1fr)] gap-3">
             <RailCell kind="terminal" />
             <div className="py-1">
-              <span className="font-mono text-xs font-medium text-blueprint">output</span>
+              <span className="font-mono text-xs font-medium text-blueprint">
+                output
+              </span>
               {lastStep && (
-                <span className="ml-2 font-mono text-[11px] text-ink-soft">final ← {lastStep.key}</span>
+                <span className="ml-2 font-mono text-[11px] text-ink-soft">
+                  final ← {lastStep.key}
+                </span>
               )}
             </div>
           </div>
 
-          {error && <p className="mt-3 font-mono text-sm text-redline">{error}</p>}
+          {error && (
+            <p className="mt-3 font-mono text-sm text-redline">{error}</p>
+          )}
 
           <div className="mt-4 flex gap-2">
             <button
@@ -556,21 +694,33 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                               className={`h-2 w-2 rounded-full ${s.status === "success" ? "bg-azure" : "bg-redline"}`}
                               aria-hidden
                             />
-                            <span className="font-mono text-blueprint">{s.key}</span>
+                            <span className="font-mono text-blueprint">
+                              {s.key}
+                            </span>
                             <span className="text-ink-soft">{s.type}</span>
                             {s.attempts > 1 && (
-                              <span className="font-mono text-ink-soft">attempt {s.attempts}</span>
+                              <span className="font-mono text-ink-soft">
+                                attempt {s.attempts}
+                              </span>
                             )}
-                            <span className="ml-auto font-mono text-ink-soft">{s.ms}ms</span>
+                            <span className="ml-auto font-mono text-ink-soft">
+                              {s.ms}ms
+                            </span>
                           </div>
                           <pre className="mt-1 overflow-x-auto font-mono text-[11px] text-ink">
-                            {s.status === "success" ? JSON.stringify(s.output, null, 2) : s.error}
+                            {s.status === "success"
+                              ? JSON.stringify(s.output, null, 2)
+                              : s.error}
                           </pre>
                         </div>
                       ))}
                     </div>
                   </div>
-                  {result.errorMessage && <p className="font-mono text-xs text-redline">{result.errorMessage}</p>}
+                  {result.errorMessage && (
+                    <p className="font-mono text-xs text-redline">
+                      {result.errorMessage}
+                    </p>
+                  )}
                   {result.output && (
                     <div>
                       <span className={EYEBROW}>Final</span>
