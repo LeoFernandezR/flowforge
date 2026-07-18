@@ -11,6 +11,7 @@ export interface StepResult {
   status: "success" | "error";
   output: Record<string, unknown> | null;
   errorMessage: string | null;
+  attempts: number; // total attempts made (>= 1), including the first
 }
 
 export interface StepExecutor {
