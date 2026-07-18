@@ -66,6 +66,29 @@ describe("runFlow", () => {
     expect(typeof arg.durationMs).toBe("number");
   });
 
+  test("records the attempt count on each step trace entry", async () => {
+    vi.mocked(prisma.flow.findUnique).mockResolvedValue(oneStepFlow as never);
+
+    let call = 0;
+    const retryingProvider: LlmProvider = {
+      name: "mock",
+      model: "mock-1",
+      generateStructured: async () => {
+        call++;
+        return call === 1 ? { name: 123 } : { name: "Ada" }; // first invalid, then valid on retry
+      },
+    };
+    await runFlow("flow_1", "Ada", { provider: retryingProvider });
+
+    const arg = vi.mocked(prisma.run.create).mock.calls[0][0].data as unknown as {
+      status: string;
+      output: { steps: Array<{ status: string; attempts: number }> };
+    };
+    expect(arg.status).toBe("success");
+    expect(arg.output.steps[0].status).toBe("success");
+    expect(arg.output.steps[0].attempts).toBe(2);
+  });
+
   test("feeds each step's output into the next step's template", async () => {
     vi.mocked(prisma.flow.findUnique).mockResolvedValue({
       ...oneStepFlow,

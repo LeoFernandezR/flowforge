@@ -16,6 +16,7 @@ interface StepTrace {
   status: "success" | "error";
   output: Record<string, unknown> | null;
   error: string | null;
+  attempts: number;
   model: string;
   ms: number;
 }
@@ -41,6 +42,7 @@ export async function runFlow(flowId: string, input: string, deps: RunFlowDeps =
     let output: Record<string, unknown> | null;
     let error: string | null;
     let model = lastModel;
+    let attempts = 1;
     try {
       const provider = deps.provider ?? getProvider(step.provider ?? flow.provider);
       lastProviderName = provider.name;
@@ -55,6 +57,7 @@ export async function runFlow(flowId: string, input: string, deps: RunFlowDeps =
       status = result.status;
       output = result.output;
       error = result.errorMessage;
+      attempts = result.attempts;
     } catch (err) {
       status = "error";
       output = null;
@@ -62,7 +65,7 @@ export async function runFlow(flowId: string, input: string, deps: RunFlowDeps =
     }
     const ms = Date.now() - start;
 
-    trace.push({ key: step.key, type: step.type, status, output, error, model, ms });
+    trace.push({ key: step.key, type: step.type, status, output, error, attempts, model, ms });
 
     if (status === "error") {
       runStatus = "error";
