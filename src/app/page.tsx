@@ -8,21 +8,27 @@ export default async function Home() {
 
   return (
     <main className="mx-auto w-full max-w-3xl p-6 sm:p-8">
-      <header className="mb-6 flex items-end justify-between border-b border-blueprint pb-3">
+      <header className="mb-6 flex items-center justify-between gap-2 border-b border-blueprint pb-3">
         <div>
-          <h1 className="font-display text-3xl font-bold uppercase tracking-[0.12em] text-ink">FlowForge</h1>
-          <p className="mt-1 font-mono text-xs text-ink-soft">Linear LLM pipelines · drafting table</p>
+          <h1 className="font-display text-3xl font-bold uppercase tracking-[0.12em] text-ink">
+            FlowForge
+          </h1>
+          <p className="mt-1 font-mono text-xs text-ink-soft">
+            Linear LLM pipelines · drafting table
+          </p>
         </div>
         <Link
           href="/flows/new"
-          className="rounded-sm bg-azure px-4 py-2 text-sm font-semibold text-paper hover:opacity-90"
+          className="rounded-sm bg-azure px-4 py-2 text-sm font-semibold text-paper text-center hover:opacity-90"
         >
           New flow
         </Link>
       </header>
 
       {flows.length === 0 ? (
-        <p className="font-mono text-sm text-ink-soft">No flows yet. Draft your first one.</p>
+        <p className="font-mono text-sm text-ink-soft">
+          No flows yet. Draft your first one.
+        </p>
       ) : (
         <ul className="divide-y divide-hairline border border-hairline bg-sheet">
           {flows.map((flow) => (
@@ -31,7 +37,10 @@ export default async function Home() {
                 href={`/flows/${flow.id}`}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-paper/50"
               >
-                <span className="h-2 w-2 rounded-full border border-blueprint" aria-hidden />
+                <span
+                  className="h-2 w-2 rounded-full border border-blueprint"
+                  aria-hidden
+                />
                 <span className="font-medium text-ink">{flow.name}</span>
               </Link>
             </li>
