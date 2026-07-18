@@ -33,7 +33,9 @@ model Run {
   provider     String
   model        String
   durationMs   Int?
+  batchId      String?                       // groups rows from one CSV upload; null for single runs
   createdAt    DateTime @default(now())
 
   @@index([flowId])
+  @@index([batchId])
 }

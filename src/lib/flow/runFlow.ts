@@ -21,7 +21,12 @@ interface StepTrace {
   ms: number;
 }
 
-export async function runFlow(flowId: string, input: string, deps: RunFlowDeps = {}): Promise<Run> {
+export async function runFlow(
+  flowId: string,
+  input: string,
+  deps: RunFlowDeps = {},
+  batchId?: string,
+): Promise<Run> {
   const flow = await prisma.flow.findUnique({ where: { id: flowId } });
   if (!flow) {
     throw new Error("Flow not found");
@@ -83,6 +88,7 @@ export async function runFlow(flowId: string, input: string, deps: RunFlowDeps =
     data: {
       flowId: flow.id,
       input,
+      batchId: batchId ?? null,
       status: runStatus,
       output: { final: finalOutput, steps: trace } as unknown as Prisma.InputJsonValue,
       errorMessage: runErrorMessage,

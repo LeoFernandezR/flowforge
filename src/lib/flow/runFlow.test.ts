@@ -246,4 +246,20 @@ describe("runFlow", () => {
     expect(arg.output.steps).toHaveLength(1);
     expect(arg.output.final).toBeNull();
   });
+
+  test("persists the given batchId on the run", async () => {
+    vi.mocked(prisma.flow.findUnique).mockResolvedValue(oneStepFlow as never);
+    await runFlow("flow_1", "Ada", { provider }, "batch_42");
+
+    const arg = vi.mocked(prisma.run.create).mock.calls[0][0].data as unknown as { batchId: string | null };
+    expect(arg.batchId).toBe("batch_42");
+  });
+
+  test("persists a null batchId when none is given", async () => {
+    vi.mocked(prisma.flow.findUnique).mockResolvedValue(oneStepFlow as never);
+    await runFlow("flow_1", "Ada", { provider });
+
+    const arg = vi.mocked(prisma.run.create).mock.calls[0][0].data as unknown as { batchId: string | null };
+    expect(arg.batchId).toBeNull();
+  });
 });
