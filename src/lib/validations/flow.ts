@@ -75,6 +75,7 @@ export const flowSchema = z
 
 export const runInputSchema = z.object({
   input: z.string().trim().min(1, "Input is required"),
+  batchId: z.string().optional(),
 });
 
 export type FlowInput = z.infer<typeof flowSchema>;

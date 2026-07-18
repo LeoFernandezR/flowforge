@@ -116,4 +116,16 @@ describe("runInputSchema", () => {
   test("rejects empty input", () => {
     expect(runInputSchema.safeParse({ input: "   " }).success).toBe(false);
   });
+
+  test("accepts input with a batchId", () => {
+    expect(runInputSchema.safeParse({ input: "Ada", batchId: "b1" }).success).toBe(true);
+  });
+
+  test("accepts input without a batchId", () => {
+    expect(runInputSchema.safeParse({ input: "Ada" }).success).toBe(true);
+  });
+
+  test("rejects a non-string batchId", () => {
+    expect(runInputSchema.safeParse({ input: "Ada", batchId: 5 }).success).toBe(false);
+  });
 });
