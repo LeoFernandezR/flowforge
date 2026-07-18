@@ -41,8 +41,10 @@ sub-project (a spec + plan under `docs/superpowers/`).
 
 *Spec & plan: `2026-07-17-flow-editor-redesign`.*
 
-- Blueprint/schematic visual identity: drafting-paper light theme, cyanotype dark theme, Archivo
-  Expanded / IBM Plex Sans / IBM Plex Mono type system
+- Blueprint/schematic visual identity: drafting-paper light theme, cyanotype dark theme, and a
+  technical type system — IBM Plex Sans (body) / IBM Plex Mono (keys, tokens, JSON) / Archivo for
+  display (Archivo Expanded was specced but is not in Next's bundled Google Fonts catalog; shipped
+  as regular-width Archivo, 600/700, with heavy uppercase tracking)
 - `FlowEditor` rewrite: two-pane layout, connector rail with ref annotations, step cards, title-block
   signature, plot-in animation on Run (reduced-motion respected), collapsible run history
 - Edit page and new-flow page restyled to match
