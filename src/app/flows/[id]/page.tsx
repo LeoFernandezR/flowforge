@@ -30,59 +30,85 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
   }));
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <Link href="/" className="text-sm underline">
-        ← Back
+    <main className="mx-auto max-w-5xl p-6 sm:p-8">
+      <Link href="/" className="font-mono text-xs text-azure hover:underline">
+        ← all flows
       </Link>
-      <h1 className="mb-6 mt-2 text-2xl font-bold">{flow.name}</h1>
 
-      <FlowEditor
-        mode="edit"
-        flow={{ id: flow.id, name: flow.name, provider: flow.provider as ProviderName, steps }}
-      />
+      <div className="mt-4">
+        <FlowEditor
+          mode="edit"
+          flow={{ id: flow.id, name: flow.name, provider: flow.provider as ProviderName, steps }}
+        />
+      </div>
 
       <section className="mt-8">
-        <h2 className="mb-2 font-semibold">Run history</h2>
-        {flow.runs.length === 0 ? (
-          <p className="text-sm text-gray-500">No runs yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-2 pr-4">When</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Output / Error</th>
-                </tr>
-              </thead>
-              <tbody>
-                {flow.runs.map((run) => {
-                  const trace = run.output as unknown as RunTrace | null;
-                  return (
-                    <tr key={run.id} className="border-b align-top">
-                      <td className="py-2 pr-4 whitespace-nowrap">{run.createdAt.toLocaleString()}</td>
-                      <td className="py-2 pr-4">{run.status}</td>
-                      <td className="py-2 pr-4">
-                        {run.status === "success" ? (
-                          <>
-                            <div className="mb-1 text-xs text-gray-500">
-                              {trace?.steps.map((s) => `${s.key}:${s.status} (${s.ms}ms)`).join("  ")}
-                            </div>
-                            <pre className="max-w-md overflow-x-auto text-xs">
-                              {JSON.stringify(trace?.final, null, 2)}
-                            </pre>
-                          </>
-                        ) : (
-                          <pre className="max-w-md overflow-x-auto text-xs">{run.errorMessage}</pre>
-                        )}
-                      </td>
+        <details className="border border-hairline bg-sheet" open>
+          <summary className="cursor-pointer border-b border-hairline px-3 py-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-blueprint">
+            Run history
+          </summary>
+          <div className="p-3">
+            {flow.runs.length === 0 ? (
+              <p className="font-mono text-sm text-ink-soft">No runs yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-hairline">
+                      <th className="py-2 pr-4 font-display text-[10px] font-semibold uppercase tracking-wider text-ink-soft">
+                        When
+                      </th>
+                      <th className="py-2 pr-4 font-display text-[10px] font-semibold uppercase tracking-wider text-ink-soft">
+                        Status
+                      </th>
+                      <th className="py-2 pr-4 font-display text-[10px] font-semibold uppercase tracking-wider text-ink-soft">
+                        Output / Error
+                      </th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {flow.runs.map((run) => {
+                      const trace = run.output as unknown as RunTrace | null;
+                      const ok = run.status === "success";
+                      return (
+                        <tr key={run.id} className="border-b border-hairline align-top">
+                          <td className="py-2 pr-4 whitespace-nowrap font-mono text-xs text-ink-soft">
+                            {run.createdAt.toLocaleString()}
+                          </td>
+                          <td className="py-2 pr-4">
+                            <span className="flex items-center gap-1.5 font-mono text-xs text-ink">
+                              <span
+                                className={`h-2 w-2 rounded-full ${ok ? "bg-azure" : "bg-redline"}`}
+                                aria-hidden
+                              />
+                              {run.status}
+                            </span>
+                          </td>
+                          <td className="py-2 pr-4">
+                            {ok ? (
+                              <>
+                                <div className="mb-1 font-mono text-xs text-ink-soft">
+                                  {trace?.steps.map((s) => `${s.key}:${s.status} (${s.ms}ms)`).join("  ")}
+                                </div>
+                                <pre className="max-w-md overflow-x-auto font-mono text-xs text-ink">
+                                  {JSON.stringify(trace?.final, null, 2)}
+                                </pre>
+                              </>
+                            ) : (
+                              <pre className="max-w-md overflow-x-auto font-mono text-xs text-redline">
+                                {run.errorMessage}
+                              </pre>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
+        </details>
       </section>
     </main>
   );
