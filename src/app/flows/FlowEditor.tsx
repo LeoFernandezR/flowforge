@@ -33,6 +33,7 @@ type StepTraceView = {
   status: string;
   output: unknown;
   error: string | null;
+  attempts: number;
   ms: number;
 };
 type RunResult = {
@@ -433,6 +434,7 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                     <span className="text-gray-500">{s.type}</span>
                     <span>{s.status}</span>
                     <span className="text-gray-500">{s.ms}ms</span>
+                    {s.attempts > 1 && <span className="text-gray-500">attempt {s.attempts}</span>}
                   </div>
                   <pre className="overflow-x-auto">
                     {s.status === "success" ? JSON.stringify(s.output, null, 2) : s.error}
