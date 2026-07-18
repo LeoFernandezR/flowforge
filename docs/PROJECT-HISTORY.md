@@ -37,6 +37,17 @@ sub-project (a spec + plan under `docs/superpowers/`).
 - Per-step run trace + save-time chain validation
 - Visual step editor: cards, add/remove/reorder, variable-chip inserter, trace panel
 
+## Phase 4 — Editor redesign
+
+*Spec & plan: `2026-07-17-flow-editor-redesign`.*
+
+- Blueprint/schematic visual identity: drafting-paper light theme, cyanotype dark theme, Archivo
+  Expanded / IBM Plex Sans / IBM Plex Mono type system
+- `FlowEditor` rewrite: two-pane layout, connector rail with ref annotations, step cards, title-block
+  signature, plot-in animation on Run (reduced-motion respected), collapsible run history
+- Edit page and new-flow page restyled to match
+- Home list shell restyled: masthead, node-bullet flow list, drafting-table empty state
+
 ---
 
 ## To do
