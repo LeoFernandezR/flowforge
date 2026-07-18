@@ -33,6 +33,7 @@ type StepTraceView = {
   status: string;
   output: unknown;
   error: string | null;
+  attempts: number;
   ms: number;
 };
 type RunResult = {
@@ -557,6 +558,9 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                             />
                             <span className="font-mono text-blueprint">{s.key}</span>
                             <span className="text-ink-soft">{s.type}</span>
+                            {s.attempts > 1 && (
+                              <span className="font-mono text-ink-soft">attempt {s.attempts}</span>
+                            )}
                             <span className="ml-auto font-mono text-ink-soft">{s.ms}ms</span>
                           </div>
                           <pre className="mt-1 overflow-x-auto font-mono text-[11px] text-ink">

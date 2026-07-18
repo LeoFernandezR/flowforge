@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -40,6 +40,8 @@ beforeEach(() => {
   })) as never);
 });
 
+afterEach(() => vi.unstubAllEnvs());
+
 describe("runFlow", () => {
   test("throws when the flow does not exist", async () => {
     vi.mocked(prisma.flow.findUnique).mockResolvedValue(null);
@@ -64,6 +66,49 @@ describe("runFlow", () => {
     expect(arg.provider).toBe("mock");
     expect(arg.model).toBe("mock-1");
     expect(typeof arg.durationMs).toBe("number");
+  });
+
+  test("records the attempt count on each step trace entry", async () => {
+    vi.mocked(prisma.flow.findUnique).mockResolvedValue(oneStepFlow as never);
+
+    let call = 0;
+    const retryingProvider: LlmProvider = {
+      name: "mock",
+      model: "mock-1",
+      generateStructured: async () => {
+        call++;
+        return call === 1 ? { name: 123 } : { name: "Ada" }; // first invalid, then valid on retry
+      },
+    };
+    await runFlow("flow_1", "Ada", { provider: retryingProvider });
+
+    const arg = vi.mocked(prisma.run.create).mock.calls[0][0].data as unknown as {
+      status: string;
+      output: { steps: Array<{ status: string; attempts: number }> };
+    };
+    expect(arg.status).toBe("success");
+    expect(arg.output.steps[0].status).toBe("success");
+    expect(arg.output.steps[0].attempts).toBe(2);
+  });
+
+  test("records the exhausted attempt count on an errored step trace", async () => {
+    vi.stubEnv("FLOWFORGE_MAX_VALIDATION_RETRIES", "2");
+    vi.mocked(prisma.flow.findUnique).mockResolvedValue(oneStepFlow as never);
+
+    const alwaysInvalid: LlmProvider = {
+      name: "mock",
+      model: "mock-1",
+      generateStructured: async () => ({ name: 123 }), // always fails Zod (name must be string)
+    };
+    await runFlow("flow_1", "Ada", { provider: alwaysInvalid });
+
+    const arg = vi.mocked(prisma.run.create).mock.calls[0][0].data as unknown as {
+      status: string;
+      output: { steps: Array<{ status: string; attempts: number }> };
+    };
+    expect(arg.status).toBe("error");
+    expect(arg.output.steps[0].status).toBe("error");
+    expect(arg.output.steps[0].attempts).toBe(3);
   });
 
   test("feeds each step's output into the next step's template", async () => {

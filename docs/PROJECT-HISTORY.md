@@ -37,9 +37,18 @@ sub-project (a spec + plan under `docs/superpowers/`).
 - Per-step run trace + save-time chain validation
 - Visual step editor: cards, add/remove/reorder, variable-chip inserter, trace panel
 
-## Phase 4 — Editor redesign
+## Phase 4 — Retry on invalid output
 
-*Spec & plan: `2026-07-17-flow-editor-redesign`.*
+*Spec & plan: `2026-07-17-flowforge-retry-invalid-output`. Merged 2026-07-17.*
+
+- Bounded retry in `runStructured` on Zod validation failure (both `extract` and `generate`)
+- Validation error + previous output fed back to the model on each retry
+- Bound from `FLOWFORGE_MAX_VALIDATION_RETRIES` (default 2 → up to 3 attempts; `0` disables)
+- Per-step attempt count recorded in the run trace and shown in the editor trace panel
+
+## Phase 5 — Editor redesign
+
+*Spec & plan: `2026-07-17-flow-editor-redesign`. Merged 2026-07-18.*
 
 - Blueprint/schematic visual identity: drafting-paper light theme, cyanotype dark theme, and a
   technical type system — IBM Plex Sans (body) / IBM Plex Mono (keys, tokens, JSON) / Archivo for
@@ -56,7 +65,6 @@ sub-project (a spec + plan under `docs/superpowers/`).
 
 Not started yet. Each is a fresh phase (brainstorm → spec → plan → build).
 
-- [ ] Retry on invalid output (feed the Zod error back and retry before failing)
 - [ ] CSV input with row-by-row processing + progress bar
 - [ ] Export results
 - [ ] "See the real prompt sent" mode
