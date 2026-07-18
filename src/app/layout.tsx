@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Archivo, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-const archivoExpanded = Archivo({
+// Display face. Archivo Expanded was specced but isn't in Next's bundled Google
+// Fonts catalog, so we ship regular-width Archivo; the CSS var name is kept as the
+// stable contract globals.css consumes.
+const archivo = Archivo({
   variable: "--font-archivo-expanded",
   subsets: ["latin"],
   weight: ["600", "700"],
@@ -33,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${archivoExpanded.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

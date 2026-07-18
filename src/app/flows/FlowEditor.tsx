@@ -78,16 +78,13 @@ function withFieldKeys(steps: IncomingStep[]): EditorStep[] {
 }
 
 // Rail cell: the connector "wire" running down the drawing, with a node marker per row.
-function RailCell({ kind }: { kind: "node" | "terminal" | "arrow" }) {
+// "terminal" = the square input/output caps; "node" = a step's round marker.
+function RailCell({ kind }: { kind: "node" | "terminal" }) {
   return (
     <div className="relative flex w-6 justify-center">
       <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-blueprint/40" aria-hidden />
       {kind === "terminal" ? (
         <span className="relative mt-1.5 h-2.5 w-2.5 border border-blueprint bg-paper" aria-hidden />
-      ) : kind === "arrow" ? (
-        <span className="relative mt-0.5 text-xs leading-none text-blueprint" aria-hidden>
-          ▼
-        </span>
       ) : (
         <span className="relative mt-4 h-2.5 w-2.5 rounded-full border border-blueprint bg-paper" aria-hidden />
       )}
@@ -256,7 +253,7 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Untitled flow"
-              className="mt-0.5 w-full bg-transparent font-display text-lg font-bold text-ink outline-none placeholder:text-ink-soft"
+              className="mt-0.5 w-full min-w-0 bg-transparent font-display text-lg font-bold text-ink outline-none placeholder:text-ink-soft"
             />
           </label>
           <label className="block px-3 py-2">
@@ -432,7 +429,7 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
                       <button
                         type="button"
                         onClick={() => addField(i)}
-                        className="mt-2 font-mono text-xs text-azure hover:underline"
+                        className="mt-2 font-mono text-xs text-blueprint hover:text-azure hover:underline"
                       >
                         + add field
                       </button>
