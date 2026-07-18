@@ -46,4 +46,10 @@ describe("POST /api/flows/[id]/run", () => {
     expect(body.error).toBe("Internal server error");
     expect(body.error).not.toContain("GEMINI_API_KEY");
   });
+
+  test("forwards batchId to runFlow", async () => {
+    vi.mocked(runFlow).mockResolvedValue({ id: "run_1", status: "success" } as never);
+    await POST(makeRequest({ input: "Ada", batchId: "batch_9" }) as never, ctx as never);
+    expect(vi.mocked(runFlow)).toHaveBeenCalledWith("flow_1", "Ada", {}, "batch_9");
+  });
 });

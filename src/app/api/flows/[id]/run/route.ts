@@ -18,7 +18,7 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/flows/[id]/
   }
 
   try {
-    const run = await runFlow(id, parsed.data.input);
+    const run = await runFlow(id, parsed.data.input, {}, parsed.data.batchId);
     return Response.json(run, { status: 200 });
   } catch (err) {
     if (err instanceof Error && err.message === "Flow not found") {
