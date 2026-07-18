@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { runStructured } from "./structured";
 import type { LlmProvider } from "../providers/types";
 import type { FieldDef } from "../types";
@@ -25,6 +25,8 @@ function scriptedProvider(responses: unknown[]): { provider: LlmProvider; inputs
 }
 
 afterEach(() => vi.unstubAllEnvs());
+
+beforeEach(() => vi.stubEnv("FLOWFORGE_MAX_VALIDATION_RETRIES", "2"));
 
 describe("runStructured", () => {
   test("succeeds on the first attempt", async () => {
@@ -72,6 +74,13 @@ describe("runStructured", () => {
 
   test("an unparseable env value falls back to the default bound", async () => {
     vi.stubEnv("FLOWFORGE_MAX_VALIDATION_RETRIES", "not-a-number");
+    const { provider } = scriptedProvider([{ name: 1 }, { name: 2 }, { name: 3 }, { name: 4 }]);
+    const result = await runStructured(SYS, "extract", fields, provider);
+    expect(result.attempts).toBe(3); // fell back to default 2 retries
+  });
+
+  test("a negative env value falls back to the default bound", async () => {
+    vi.stubEnv("FLOWFORGE_MAX_VALIDATION_RETRIES", "-1");
     const { provider } = scriptedProvider([{ name: 1 }, { name: 2 }, { name: 3 }, { name: 4 }]);
     const result = await runStructured(SYS, "extract", fields, provider);
     expect(result.attempts).toBe(3); // fell back to default 2 retries
