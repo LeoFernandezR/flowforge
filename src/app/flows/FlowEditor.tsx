@@ -6,6 +6,7 @@ import { createFlow, deleteFlow, updateFlow } from "./actions";
 import type { FieldDef, FieldType, Step, StepType } from "@/lib/flow/types";
 import { availableRefs } from "@/lib/flow/template";
 import { PROVIDER_NAMES, type ProviderName } from "@/lib/validations/flow";
+import CsvRunPanel from "./CsvRunPanel";
 
 const FIELD_TYPES: FieldType[] = [
   "string",
@@ -158,6 +159,7 @@ export default function FlowEditor({
   const [input, setInput] = useState("");
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
+  const [inputMode, setInputMode] = useState<"text" | "csv">("text");
 
   const promptRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
 
@@ -659,6 +661,30 @@ export default function FlowEditor({
               </span>
             </div>
             <div className="space-y-3 p-3">
+              <div className="flex overflow-hidden rounded-sm border border-hairline text-xs">
+                {(["text", "csv"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setInputMode(m)}
+                    className={`flex-1 px-3 py-1.5 font-display uppercase tracking-[0.15em] ${
+                      inputMode === m
+                        ? "bg-blueprint text-paper"
+                        : "text-ink-soft hover:bg-paper/40"
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+
+              {inputMode === "csv" ? (
+                <CsvRunPanel
+                  flowId={flow.id}
+                  onComplete={() => router.refresh()}
+                />
+              ) : (
+                <>
               <label className="block">
                 <span className={EYEBROW}>Input</span>
                 <textarea
@@ -730,6 +756,8 @@ export default function FlowEditor({
                     </div>
                   )}
                 </div>
+              )}
+                </>
               )}
             </div>
           </aside>
