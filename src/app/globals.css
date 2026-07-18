@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* light — drafting paper */
+  --paper: #eef2f7;
+  --sheet: #fbfcfe;
+  --grid: #dce6f2;
+  --ink: #0b2440;
+  --ink-soft: #4a5b72;
+  --blueprint: #16457a;
+  --azure: #0e6fe0;
+  --redline: #c2452b;
+  --hairline: #c9d6e6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* dark — cyanotype */
+    --paper: #0a2a49;
+    --sheet: #0c3157;
+    --grid: #164675;
+    --ink: #dcebfb;
+    --ink-soft: #8fb4da;
+    --blueprint: #5fa8e6;
+    --azure: #7fc4ff;
+    --redline: #ff7a5c;
+    --hairline: #1c4a78;
   }
 }
 
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-grid: var(--grid);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-blueprint: var(--blueprint);
+  --color-azure: var(--azure);
+  --color-redline: var(--redline);
+  --color-hairline: var(--hairline);
+  --font-display: var(--font-archivo-expanded);
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--azure);
+  outline-offset: 2px;
+}
+
+@keyframes plot-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plot-in {
+  animation: plot-in 320ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plot-in {
+    animation: none;
+  }
 }
