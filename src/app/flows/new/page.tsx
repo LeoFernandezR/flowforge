@@ -3,7 +3,7 @@ import FlowEditor from "../FlowEditor";
 
 export default function NewFlowPage() {
   return (
-    <main className="mx-auto max-w-3xl p-6 sm:p-8">
+    <main className="mx-auto w-full max-w-3xl p-6 sm:p-8">
       <Link href="/" className="font-mono text-xs text-blueprint hover:text-azure hover:underline">
         ← all flows
       </Link>

@@ -281,7 +281,7 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
         </div>
       </section>
 
-      <div className={`grid gap-6 ${twoPane ? "lg:grid-cols-[minmax(0,1fr)_360px]" : ""}`}>
+      <div className={`grid grid-cols-1 gap-6 ${twoPane ? "lg:grid-cols-[minmax(0,1fr)_360px]" : ""}`}>
         {/* ── The drawing ── */}
         <div className="min-w-0">
           {/* input node */}
@@ -513,7 +513,7 @@ export default function FlowEditor({ mode, flow }: { mode: "new" | "edit"; flow?
 
         {/* ── Test rig ── */}
         {twoPane && flow && (
-          <aside className="h-fit border border-blueprint bg-sheet lg:sticky lg:top-6">
+          <aside className="h-fit min-w-0 border border-blueprint bg-sheet lg:sticky lg:top-6">
             <div className="border-b border-hairline px-3 py-1.5">
               <span className="font-display text-xs font-bold uppercase tracking-[0.2em] text-blueprint">
                 Test rig

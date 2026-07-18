@@ -7,7 +7,7 @@ export default async function Home() {
   const flows = await prisma.flow.findMany({ orderBy: { updatedAt: "desc" } });
 
   return (
-    <main className="mx-auto max-w-3xl p-6 sm:p-8">
+    <main className="mx-auto w-full max-w-3xl p-6 sm:p-8">
       <header className="mb-6 flex items-end justify-between border-b border-blueprint pb-3">
         <div>
           <h1 className="font-display text-3xl font-bold uppercase tracking-[0.12em] text-ink">FlowForge</h1>

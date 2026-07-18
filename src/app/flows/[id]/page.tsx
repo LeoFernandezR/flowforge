@@ -30,7 +30,7 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
   }));
 
   return (
-    <main className="mx-auto max-w-5xl p-6 sm:p-8">
+    <main className="mx-auto w-full max-w-5xl p-6 sm:p-8">
       <Link href="/" className="font-mono text-xs text-blueprint hover:text-azure hover:underline">
         ← all flows
       </Link>
