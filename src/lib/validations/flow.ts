@@ -50,7 +50,7 @@ export const stepSchema = z
 export const flowSchema = z
   .object({
     name: z.string().trim().min(1, "Name is required").max(120),
-    provider: z.enum(PROVIDER_NAMES).default("gemini"),
+    provider: z.enum(PROVIDER_NAMES).default("groq"),
     steps: z.array(stepSchema).min(1, "Add at least one step"),
   })
   .superRefine((flow, ctx) => {

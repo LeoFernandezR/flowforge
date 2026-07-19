@@ -95,8 +95,8 @@ describe("flowSchema", () => {
     expect(flowSchema.safeParse({ ...validFlow, provider: "openai" }).success).toBe(false);
   });
 
-  test("defaults the provider to gemini", () => {
-    expect(flowSchema.parse(validFlow).provider).toBe("gemini");
+  test("defaults the provider to groq", () => {
+    expect(flowSchema.parse(validFlow).provider).toBe("groq");
   });
 });
 
