@@ -1,0 +1,7 @@
+ticket_id,customer,body
+TKT-1041,Priya Raman,"Hi, I was charged twice for the November plan — order #88213 shows two identical $49 line items. Could you refund the duplicate? Not urgent, but I'd like it sorted before the next cycle."
+TKT-1042,,"the export button does nothing. clicked it maybe ten times. no download, no error, nothing in the console. this is blocking my monday report."
+TKT-1043,Tomas Vieira,"Our entire team has been locked out since the 3am deploy. SSO redirects to a blank page and then times out. We have 40 people idle and a customer demo at noon. Please escalate."
+TKT-1044,Aisha Bello,"Quick question — is there a way to change the timezone on scheduled reports? I couldn't find it in settings. No rush at all, just curious."
+TKT-1045,,"cancel my subscription. i've asked twice already and i'm still being billed. want a full refund for the last two months."
+TKT-1046,Daniel Okafor,"The CSV import silently drops rows that have a comma inside a quoted field. About 12% of my file went missing and there was no warning. Happy to send a sample file if useful."
