@@ -15,7 +15,7 @@ datasource db {
 model Flow {
   id        String   @id @default(cuid())
   name      String
-  provider  String   @default("gemini")   // "gemini" | "groq"
+  provider  String   @default("groq")     // "gemini" | "groq"
   steps     Json                          // ordered Step[]
   runs      Run[]
   createdAt DateTime @default(now())
