@@ -59,13 +59,21 @@ sub-project (a spec + plan under `docs/superpowers/`).
 - Edit page and new-flow page restyled to match
 - Home list shell restyled: masthead, node-bullet flow list, drafting-table empty state
 
+## Phase 6 — CSV input
+
+*Spec & plan: `2026-07-18-flowforge-csv-input`. Merged 2026-07-18.*
+
+- `Run.batchId` column groups rows from one CSV upload
+- Client-side CSV parsing (papaparse) behind `parseCsv`
+- Test rig Text/CSV toggle: file upload, column picker, sequential per-row run loop
+- Live progress bar with succeeded/failed counts and an inline results table (50-row cap)
+- Run history groups a batch's rows into one collapsible entry
+
 ---
 
 ## To do
 
 Not started yet. Each is a fresh phase (brainstorm → spec → plan → build).
-
-- [ ] CSV input with row-by-row processing + progress bar
 - [ ] Export results
 - [ ] "See the real prompt sent" mode
 - [ ] Preloaded example flows (3-4: support tickets, invoice extraction, product categorization)
