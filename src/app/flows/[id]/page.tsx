@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import FlowEditor from "../FlowEditor";
 import type { Step } from "@/lib/flow/types";
 import type { ProviderName } from "@/lib/validations/flow";
+import { groupRuns } from "@/lib/flow/runGroups";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const flow = await prisma.flow.findUnique({
     where: { id },
-    include: { runs: { orderBy: { createdAt: "desc" }, take: 20 } },
+    include: { runs: { orderBy: { createdAt: "desc" }, take: 100 } },
   });
 
   if (!flow) {
@@ -28,6 +29,8 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
     provider: (s.provider ?? "") as ProviderName | "",
     fields: s.fields ?? [],
   }));
+
+  const runGroups = groupRuns(flow.runs);
 
   return (
     <main className="mx-auto w-full max-w-5xl p-6 sm:p-8">
@@ -67,38 +70,78 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
                     </tr>
                   </thead>
                   <tbody>
-                    {flow.runs.map((run) => {
-                      const trace = run.output as unknown as RunTrace | null;
-                      const ok = run.status === "success";
+                    {runGroups.map((group) => {
+                      if (group.kind === "single") {
+                        const run = group.run;
+                        const trace = run.output as unknown as RunTrace | null;
+                        const ok = run.status === "success";
+                        return (
+                          <tr key={run.id} className="border-b border-hairline align-top">
+                            <td className="py-2 pr-4 whitespace-nowrap font-mono text-xs text-ink-soft">
+                              {run.createdAt.toLocaleString()}
+                            </td>
+                            <td className="py-2 pr-4">
+                              <span className="flex items-center gap-1.5 font-mono text-xs text-ink">
+                                <span
+                                  className={`h-2 w-2 rounded-full ${ok ? "bg-azure" : "bg-redline"}`}
+                                  aria-hidden
+                                />
+                                {run.status}
+                              </span>
+                            </td>
+                            <td className="py-2 pr-4">
+                              {ok ? (
+                                <>
+                                  <div className="mb-1 font-mono text-xs text-ink-soft">
+                                    {trace?.steps.map((s) => `${s.key}:${s.status} (${s.ms}ms)`).join("  ")}
+                                  </div>
+                                  <pre className="max-w-md overflow-x-auto font-mono text-xs text-ink">
+                                    {JSON.stringify(trace?.final, null, 2)}
+                                  </pre>
+                                </>
+                              ) : (
+                                <pre className="max-w-md overflow-x-auto font-mono text-xs text-redline">
+                                  {run.errorMessage}
+                                </pre>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      }
                       return (
-                        <tr key={run.id} className="border-b border-hairline align-top">
+                        <tr key={group.batchId} className="border-b border-hairline align-top">
                           <td className="py-2 pr-4 whitespace-nowrap font-mono text-xs text-ink-soft">
-                            {run.createdAt.toLocaleString()}
+                            {group.runs[0].createdAt.toLocaleString()}
                           </td>
                           <td className="py-2 pr-4">
                             <span className="flex items-center gap-1.5 font-mono text-xs text-ink">
-                              <span
-                                className={`h-2 w-2 rounded-full ${ok ? "bg-azure" : "bg-redline"}`}
-                                aria-hidden
-                              />
-                              {run.status}
+                              <span className="h-2 w-2 rounded-full bg-blueprint" aria-hidden />
+                              CSV batch
                             </span>
                           </td>
                           <td className="py-2 pr-4">
-                            {ok ? (
-                              <>
-                                <div className="mb-1 font-mono text-xs text-ink-soft">
-                                  {trace?.steps.map((s) => `${s.key}:${s.status} (${s.ms}ms)`).join("  ")}
-                                </div>
-                                <pre className="max-w-md overflow-x-auto font-mono text-xs text-ink">
-                                  {JSON.stringify(trace?.final, null, 2)}
-                                </pre>
-                              </>
-                            ) : (
-                              <pre className="max-w-md overflow-x-auto font-mono text-xs text-redline">
-                                {run.errorMessage}
-                              </pre>
-                            )}
+                            <details>
+                              <summary className="cursor-pointer font-mono text-xs text-ink-soft">
+                                {group.total} rows · <span className="text-azure">{group.succeeded} ✓</span>
+                                {" / "}
+                                <span className="text-redline">{group.failed} ✗</span>
+                              </summary>
+                              <div className="mt-1 space-y-1">
+                                {group.runs.map((run) => {
+                                  const trace = run.output as unknown as RunTrace | null;
+                                  return (
+                                    <pre
+                                      key={run.id}
+                                      className="max-w-md overflow-x-auto font-mono text-xs text-ink"
+                                    >
+                                      {run.status === "success"
+                                        ? JSON.stringify(trace?.final)
+                                        : run.errorMessage}
+                                    </pre>
+                                  );
+                                })}
+                              </div>
+                            </details>
                           </td>
                         </tr>
                       );
